@@ -49,6 +49,7 @@ class DepthEstimationApp:
 
     def estimate_depth(
         self,
+        filename: str,
         image: Image.Image,
         raw_output: bool = False,
     ) -> Image.Image | npt.NDArray[np.float32]:
@@ -77,7 +78,15 @@ class DepthEstimationApp:
         prediction = self.model(image_tensor)
         prediction = undo_resize_pad(prediction, image.size, scale, padding)
         numpy_output = cast(npt.NDArray[np.float32], prediction.squeeze().cpu().numpy())
+
+        # add file name in logs
+        print(filename, numpy_output.shape[0], numpy_output.shape[1], numpy_output.min(), numpy_output.max())
+
+        # normalize depth map by 0 ~ max
+        # if raw_output:
+        #     return Image.fromarray(((numpy_output / numpy_output.max()) * 255).astype(np.uint8))
+        # normalize depth map by min ~ max
         if raw_output:
-            return Image.fromarray(((numpy_output / numpy_output.max()) * 255).astype(np.uint8))
+            return Image.fromarray((((numpy_output - numpy_output.min()) / (numpy_output.max() - numpy_output.min())) * 255).astype(np.uint8))
         heatmap = plt.cm.get_cmap("plasma")(numpy_output / numpy_output.max())[..., :3]
         return Image.fromarray((heatmap * 255).astype(np.uint8))

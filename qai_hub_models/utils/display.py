@@ -33,7 +33,8 @@ def save_image(image: Image, base_dir: str, filename: str, desc: str) -> None:
     os.makedirs(base_dir, exist_ok=True)
     filename = os.path.join(base_dir, filename)
     image.save(filename)
-    print(f"Saving {desc} to {filename}")
+    # Remove logs
+    # print(f"Saving {desc} to {filename}")
 
 
 def is_headless() -> bool:
