@@ -59,7 +59,7 @@ def depth_estimation_demo(
             height,
             width,
         )
-        heatmap_image = app.estimate_depth(image)
+        heatmap_image = app.estimate_depth(image, raw_output=True)
         assert isinstance(heatmap_image, Image.Image)
 
         if not is_test:
