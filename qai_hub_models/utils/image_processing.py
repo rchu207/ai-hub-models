@@ -311,6 +311,11 @@ def resize_pad(
     )
     padding = (pad_left, pad_top)
 
+    # rescaled_image = interpolate(
+    #     image, size=dst_size, mode="bilinear"
+    # )
+    # rescaled_padded_image = rescaled_image
+
     return rescaled_padded_image, scale, padding
 
 
@@ -353,6 +358,8 @@ def undo_resize_pad(
         scaled_padding[0] : scaled_padding[0] + width,
     ]
 
+    # rescaled_image = interpolate(image, size=(height, width), mode="bilinear")
+    # return rescaled_image
 
 def transform_resize_pad_coordinates(
     coordinates: torch.Tensor, scale_factor: float, pad: torch.Tensor | tuple[int, int]
