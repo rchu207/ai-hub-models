@@ -4,6 +4,9 @@
 # ---------------------------------------------------------------------
 
 
+import glob
+import os
+
 from PIL import Image
 
 from qai_hub_models.models._shared.depth_estimation.app import DepthEstimationApp
@@ -31,7 +34,7 @@ def depth_estimation_demo(
         "--image",
         type=str,
         default=default_image,
-        help="image file path or URL",
+        help="image file path, image file folder or URL",
     )
     args = parser.parse_args([] if is_test else None)
     model = demo_model_from_cli_args(model_cls, model_id, args)
@@ -39,19 +42,30 @@ def depth_estimation_demo(
 
     # Load image
     (_, _, height, width) = model_cls.get_input_spec()["image"][0]
-    image = load_image(args.image)
     print("Model Loaded")
 
-    app = DepthEstimationApp(
-        model,  # type: ignore[arg-type]
-        height,
-        width,
-    )
-    heatmap_image = app.estimate_depth(image)
-    assert isinstance(heatmap_image, Image.Image)
+    if os.path.isfile(args.image):
+        filenames = [args.image]
+    else:
+        filenames = glob.glob(os.path.join(args.image, '**/*'), recursive=True)
 
-    if not is_test:
-        # Resize / unpad annotated image
-        display_or_save_image(
-            heatmap_image, args.output_dir, "out_heatmap.png", "heatmap"
+    for k, filename in enumerate(filenames):
+        print(f'Progress {k+1}/{len(filenames)}: {filename}')
+
+        image = load_image(filename)
+
+        app = DepthEstimationApp(
+            model,  # type: ignore[arg-type]
+            height,
+            width,
         )
+        heatmap_image = app.estimate_depth(image)
+        assert isinstance(heatmap_image, Image.Image)
+
+        if not is_test:
+            # Resize / unpad annotated image
+            basename = os.path.basename(filename)
+            outname = os.path.splitext(basename)[0] + ".png"
+            display_or_save_image(
+                heatmap_image, args.output_dir, outname, "heatmap"
+            )
