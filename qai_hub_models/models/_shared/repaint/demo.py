@@ -52,7 +52,11 @@ def repaint_demo(
     # Load image & model
     model = demo_model_from_cli_args(model_type, model_id, args)
     image = load_image(args.image)
+    if image.mode == 'RGBA':
+        image = image.convert('RGB')
     mask = load_image(args.mask)
+    if mask.mode == 'RGBA' or mask.mode == 'RGB':
+        mask = mask.convert('L')
     print("Model Loaded")
 
     # Run app

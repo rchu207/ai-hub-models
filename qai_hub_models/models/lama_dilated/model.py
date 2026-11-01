@@ -18,6 +18,7 @@ from qai_hub_models.utils.asset_loaders import (
     CachedWebModelAsset,
     SourceAsRoot,
     load_json,
+    load_yaml,
     load_torch,
     set_log_level,
 )
@@ -115,10 +116,13 @@ def _load_lama_dilated_source_model_from_weights(weights_name: str) -> torch.nn.
 
         # Pass config as needed to create the module for tracing.
         config_json = load_json(config_url)
-        config = OmegaConf.create(config_json)
+        config_url = '/Users/rchu/Downloads/big-lama/config.yaml'
+        config_yaml = load_yaml(config_url)
+        config = OmegaConf.create(config_yaml)
         kwargs = dict(config.training_model)
         kwargs.pop("kind")
         kwargs["use_ddp"] = True
+        weights_url = '/Users/rchu/Downloads/big-lama/models/best.ckpt'
         state = load_torch(weights_url)
         with set_log_level(logging.WARN):
             lama_dilated_model = DefaultInpaintingTrainingModule(config, **kwargs)
